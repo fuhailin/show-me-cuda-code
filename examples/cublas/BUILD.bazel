@@ -1,0 +1,19 @@
+# Run with 'bazel run //examples/cublas:main'
+cc_binary(
+    name = "main",
+    srcs = ["cublas.cpp"],
+    deps = [
+        "@local_config_cuda//cuda:cublas",
+        "@local_config_cuda//cuda:cuda_headers",
+    ],
+)
+
+cc_binary(
+    name = "cublas_exmple",
+    srcs = ["cublas_exmple.cu.cc"],
+    deps = [
+        "@local_config_cuda//cuda:cublas",
+        "@local_config_cuda//cuda:cuda_headers",
+        "@local_config_cuda//cuda:cuda_runtime",
+    ],
+)

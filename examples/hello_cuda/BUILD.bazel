@@ -1,0 +1,29 @@
+load("@local_config_cuda//cuda:build_defs.bzl", "cuda_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# cuda_library(
+#     name = "kernel",
+#     srcs = ["kernel.cu.cc"],
+#     hdrs = ["kernel.h"],
+#     # copts = if_nvcc([
+#     #     "-nvcc_options",
+#     #     "ptxas-options=-v",
+#     # ]),
+#     # tags = [
+#     #     "gpu",
+#     #     "manual",
+#     # ],
+#     deps = [
+#         "@local_config_cuda//cuda:cuda_runtime",
+#     ],
+# )
+
+cc_binary(
+    name = "main",
+    srcs = ["main.cu.cc"],
+    # deps = [":kernel"],
+    deps = [
+        "@local_config_cuda//cuda:cuda_runtime",
+    ],
+)

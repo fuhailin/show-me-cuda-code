@@ -1,0 +1,70 @@
+# Put user-specific options in .bazelrc.user
+try-import %workspace%/.bazelrc.user
+
+
+# #############################################################################
+# All default build options below. These apply to all build commands.
+# #############################################################################
+# Make Bazel print out all options from rc files.
+build --announce_rc
+
+# Prevent invalid caching if input files are modified during a build.
+build --experimental_guard_against_concurrent_changes
+
+# Allow up to 10 Mb of logging
+build --experimental_ui_max_stdouterr_bytes=10485760
+
+# By default, build Deepray in C++ 17 mode.
+build --cxxopt=-std=c++17
+build --host_cxxopt=-std=c++17
+
+# Disable clang extention that rejects type definitions within offsetof.
+# This was added in clang-16 by https://reviews.llvm.org/D133574.
+# Can be removed once upb is updated, since a type definition is used within
+# offset of in the current version of ubp.
+# See https://github.com/protocolbuffers/upb/blob/9effcbcb27f0a665f9f345030188c0b291e32482/upb/upb.c#L183.
+build:clang --copt=-Wno-gnu-offsetof-extensions
+# Disable clang extention that rejects unknown arguments.
+build:clang --copt=-Qunused-arguments
+# Error on struct/class mismatches, since this causes link failures on Windows.
+build:clang --copt=-Werror=mismatched-tags
+
+# Configs for CUDA
+# CUDA: This config refers to building CUDA op kernels with nvcc.
+build:cuda --repo_env TF_NEED_CUDA=1
+build:cuda --repo_env TF_NCCL_USE_STUB=1
+build:cuda --crosstool_top=@local_config_cuda//crosstool:toolchain
+build:cuda --@local_config_cuda//:enable_cuda
+# Select supported compute capabilities (supported graphics cards).
+# This is the same as the official TensorFlow builds.
+# See https://developer.nvidia.com/cuda-gpus#compute
+# "sm" means we emit only cubin, which is forward compatible within a GPU generation.
+# "compute" means we emit both cubin and PTX, which is larger but also forward compatible to future GPU generations.
+build:cuda --repo_env HERMETIC_CUDA_COMPUTE_CAPABILITIES="sm_50,sm_60,sm_70,sm_80,compute_90"
+# Default hermetic CUDA and CUDNN versions.
+build:cuda --repo_env=HERMETIC_CUDA_VERSION="12.3.2"
+build:cuda --repo_env=HERMETIC_CUDNN_VERSION="9.1.1"
+# This flag is needed to include CUDA libraries.
+build:cuda --@local_config_cuda//cuda:include_cuda_libs=true
+
+# CUDA: This config refers to building CUDA op kernels with clang.
+build:cuda_clang --config=cuda
+build:cuda_clang --@local_config_cuda//:cuda_compiler=clang
+build:cuda_clang --copt=-Qunused-arguments
+# Permit newer CUDA versions than Clang is aware of
+build:cuda_clang --copt="-Wno-unknown-cuda-version"
+# Set lld as the linker.
+build:cuda_clang --host_linkopt="-fuse-ld=lld"
+build:cuda_clang --host_linkopt="-lm"
+build:cuda_clang --linkopt="-fuse-ld=lld"
+build:cuda_clang --linkopt="-lm"
+
+# Build with nvcc for CUDA and clang for host
+build:cuda_nvcc --config=cuda
+build:cuda_nvcc --action_env=TF_NVCC_CLANG="1"
+build:cuda_nvcc --@local_config_cuda//:cuda_compiler=nvcc
+
+# Flag to enable remote config
+common --experimental_repo_remote_exec
+
+

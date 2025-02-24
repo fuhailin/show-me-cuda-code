@@ -1,0 +1,6 @@
+build --action_env=HTTP_PROXY=http://127.0.0.1:7890
+build --action_env=HTTPS_PROXY=http://127.0.0.1:7890
+build --verbose_failures=true
+
+build --config=cuda_nvcc
+build:cuda --repo_env HERMETIC_CUDA_COMPUTE_CAPABILITIES="sm_80"
